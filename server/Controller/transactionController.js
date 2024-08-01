@@ -1,82 +1,143 @@
-import { readData, writeData } from "../helper/readAndWriteData.js";
+import {
+  Product,
+  Transaction,
+  TransactionDetail,
+} from "../utils/models/index.js";
 
-// Endpoints for Transactions
-export const getAllTransaction = (req, res) => {
-  const transactions = readData("db/transactions.json");
-  res.json(transactions);
+// Create a transaction
+export const createTransaction = async (req, res) => {
+  const { transactionType, details } = req.body;
+
+  if (!transactionType || !details || !Array.isArray(details)) {
+    return res.status(400).json({ error: "Invalid transaction data" });
+  }
+
+  try {
+    // Create the transaction record
+    const newTransaction = await Transaction.create({ transactionType });
+
+    // Process each product in the transaction details
+    for (const item of details) {
+      const { productId, quantity } = item;
+
+      // Check if product exists
+      const product = await Product.findByPk(productId);
+      if (!product) {
+        return res
+          .status(400)
+          .json({ error: `Invalid productId: ${productId}` });
+      }
+
+      // Check stock availability for StockOut transactions
+      if (transactionType === "StockOut" && product.stock < quantity) {
+        return res
+          .status(400)
+          .json({ error: `Insufficient stock for productId: ${productId}` });
+      }
+
+      // Update product stock
+      product.stock =
+        transactionType === "StockIn"
+          ? product.stock + quantity
+          : product.stock - quantity;
+      await product.save();
+
+      // Create transaction detail record
+      await TransactionDetail.create({
+        transactionId: newTransaction.id,
+        productId,
+        quantity,
+      });
+    }
+
+    res.status(201).json(newTransaction);
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    res
+      .status(500)
+      .json({ error: "Error creating transaction", details: error.message });
+  }
 };
 
-export const getTransactionById = (req, res) => {
-  const transactions = readData("db/transactions.json");
-  const transaction = transactions.find(
-    (t) => t.id === parseInt(req.params.id)
-  );
-  if (transaction) {
+// Get all transactions
+export const getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.findAll({
+      include: [{ model: TransactionDetail, include: [Product] }],
+    });
+    res.json(transactions);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "error", message: "Error fetching transactions" });
+  }
+};
+
+// Get transaction by ID
+export const getTransactionById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const transaction = await Transaction.findByPk(id, {
+      include: [{ model: TransactionDetail, include: [Product] }],
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
     res.json(transaction);
-  } else {
-    res.status(404).send("Transaction not found");
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching transaction", details: error.message });
   }
 };
 
-export const createTransaction = (req, res) => {
-  const transactions = readData("db/transactions.json");
-  const newTransactionId = transactions[transactions.length - 1].id + 1;
-  const products = readData("db/products.json");
-  const newTransaction = Object.assign({ id: newTransactionId }, req.body);
-  transactions.push(newTransaction);
+// Update a transaction (typically not updated, but included for completeness)
+export const editTransaction = async (req, res) => {
+  const { id } = req.params;
+  const { transactionType, details } = req.body;
 
-  // Update product stock
-  newTransaction.details.forEach((detail) => {
-    const product = products.find((p) => p.id === detail.productId);
-    if (newTransaction.transactionType === "StockIn") {
-      product.stock += detail.quantity;
-    } else if (newTransaction.transactionType === "StockOut") {
-      product.stock -= detail.quantity;
+  try {
+    const transaction = await Transaction.findByPk(id);
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
     }
-  });
-  writeData("db/products.json", products);
-  writeData("db/transactions.json", transactions);
-  res.status(201).json(newTransaction);
-};
 
-export const editTransaction = (req, res) => {
-  const transactions = readData("db/transactions.json");
-  const transactionIndex = transactions.findIndex(
-    (t) => t.id === parseInt(req.params.id)
-  );
-  if (transactionIndex === -1) {
-    return res.status(404).send("Transaction not found");
-  }
+    if (transactionType) transaction.transactionType = transactionType;
+    await transaction.save();
 
-  const updatedTransaction = { ...transactions[transactionIndex], ...req.body };
-  transactions[transactionIndex] = updatedTransaction;
-
-  // Update product stock based on updated transaction details
-  const products = readData("db/products.json");
-  updatedTransaction.details.forEach((detail) => {
-    const product = products.find((p) => p.id === detail.productId);
-    if (updatedTransaction.transactionType === "StockIn") {
-      product.stock += detail.quantity;
-    } else if (updatedTransaction.transactionType === "StockOut") {
-      product.stock -= detail.quantity;
+    // Update transaction details
+    if (details && Array.isArray(details)) {
+      // (additional logic for updating details if necessary)
     }
-  });
 
-  writeData("db/products.json", products);
-  writeData("db/transactions.json", transactions);
-  res.json(updatedTransaction);
+    res.json(transaction);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error updating transaction", details: error.message });
+  }
 };
 
-export const deleteTransaction = (req, res) => {
-  const transactions = readData("db/transactions.json");
-  const transactionIndex = transactions.findIndex(
-    (t) => t.id === parseInt(req.params.id)
-  );
-  if (transactionIndex === -1) {
-    return res.status(404).send("Transaction not found");
-  }
+// Delete a transaction
+export const deleteTransaction = async (req, res) => {
+  const { id } = req.params;
 
-  transactions.splice(transactionIndex, 1);
-  writeData("db/transactions.json", transactions);
-  res.status(204).send();
+  try {
+    const transaction = await Transaction.findByPk(id);
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    await transaction.destroy();
+    res.status(204).send();
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error deleting transaction", details: error.message });
+  }
 };

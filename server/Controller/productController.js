@@ -1,55 +1,98 @@
-import { readData, writeData } from "../helper/readAndWriteData.js";
+import { Category, Product } from "../utils/models/index.js";
 
 // Endpoints for Products
-export const getAllProducts = (req, res) => {
-  const products = readData("db/products.json");
-  res.json(products);
+export const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching products",
+    });
+  }
 };
 
-export const getProductById = (req, res) => {
-  const products = readData("db/products.json");
-  const product = products.find((p) => p.id === parseInt(req.params.id));
-  if (product) {
+export const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
     res.json(product);
-  } else {
-    res.status(404).send("Product not found");
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching product" });
   }
 };
 
-export const createProduct = (req, res) => {
-  const products = readData("db/products.json");
-  const newProductId = products[products.length - 1].id + 1;
-  const newProduct = Object.assign({ id: newProductId }, req.body);
-  products.push(newProduct);
-  writeData("db/products.json", products);
-  res.status(201).json(newProduct);
-};
+export const createProduct = async (req, res) => {
+  const { productName, productDescription, productImage, categoryId, stock } =
+    req.body;
 
-export const editProduct = (req, res) => {
-  const products = readData("db/products.json");
-  const productIndex = products.findIndex(
-    (p) => p.id === parseInt(req.params.id)
-  );
-  if (productIndex === -1) {
-    return res.status(404).send("Product not found");
+  if (!productName || !categoryId || !stock) {
+    return res.status(400).json({
+      error: "Missing required fields: productName, categoryId, and stock",
+    });
   }
 
-  const updatedProduct = { ...products[productIndex], ...req.body };
-  products[productIndex] = updatedProduct;
-  writeData("db/products.json", products);
-  res.json(updatedProduct);
+  try {
+    // Validate categoryId
+    const category = await Category.findByPk(categoryId);
+    if (!category) {
+      return res
+        .status(400)
+        .json({ status: "Failed", message: "Invalid Category ID" });
+    }
+
+    // Create the product if the categoryId is valid
+    const newProduct = await Product.create({
+      productName,
+      productDescription,
+      productImage,
+      categoryId,
+      stock,
+    });
+
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error("Error creating product:", error);
+    res
+      .status(500)
+      .json({ error: "Error creating product", details: error.message });
+  }
 };
 
-export const deleteProduct = (req, res) => {
-  const products = readData("db/products.json");
-  const productIndex = products.findIndex(
-    (p) => p.id === parseInt(req.params.id)
-  );
-  if (productIndex === -1) {
-    return res.status(404).send("Product not found");
+export const editProduct = async (req, res) => {
+  try {
+    const { productName, productDescription, productImage, categoryId, stock } =
+      req.body;
+    const [updated] = await Product.update(
+      { productName, productDescription, productImage, categoryId, stock },
+      { where: { id: req.params.id } }
+    );
+    if (updated) {
+      const updatedProduct = await Product.findByPk(req.params.id);
+      return res.status(200).json(updatedProduct);
+    } else {
+      res.status(404).json({
+        status: "Failed",
+        message: "Product not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error updating product" });
   }
+};
 
-  products.splice(productIndex, 1);
-  writeData("db/products.json", products);
-  res.status(204).send();
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    await product.destroy();
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting product" });
+  }
 };

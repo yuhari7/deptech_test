@@ -1,55 +1,98 @@
-import { readData, writeData } from "../helper/readAndWriteData.js";
+import { Category } from "../utils/models/index.js";
 
-// Endpoints for Product Categories
-export const getAllCategories = (req, res) => {
-  const categories = readData("db/categories.json");
-  res.json(categories);
+// Get all categories
+export const getAllCategories = async (req, res) => {
+  try {
+    const categories = await Category.findAll();
+    res.json(categories);
+  } catch (error) {
+    console.error("Error fetching categories:", error); // Log the error
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching categories",
+      details: error.message, // Provide more error details
+    });
+  }
 };
 
-export const getCategoryById = (req, res) => {
-  const categories = readData("db/categories.json");
-  const category = categories.find((c) => c.id === parseInt(req.params.id));
-  if (category) {
+export const getCategoryById = async (req, res) => {
+  try {
+    const category = await Category.findByPk(req.params.id);
+    if (!category) {
+      return res.status(404).json({ error: "Category not found" });
+    }
     res.json(category);
-  } else {
-    res.status(404).send("Category not found");
+  } catch (error) {
+    console.error("Error fetching category:", error); // Log the error
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching category",
+      details: error.message, // Provide more error details
+    });
   }
 };
 
-export const createCategory = (req, res) => {
-  const categories = readData("db/categories.json");
-  const newCategoryId = categories[categories.length - 1].id + 1;
-  const newCategory = Object.assign({ id: newCategoryId }, req.body);
-  categories.push(newCategory);
-  writeData("db/categories.json", categories);
-  res.status(201).json(newCategory);
+export const createCategory = async (req, res) => {
+  try {
+    const { categoryName, categoryDescription } = req.body;
+    const newCategory = await Category.create({
+      categoryName,
+      categoryDescription,
+    });
+    res.status(201).json(newCategory);
+  } catch (error) {
+    console.error("Error creating category:", error); // Log the error
+    res.status(500).json({
+      status: "error",
+      message: "Error creating category",
+      details: error.message, // Provide more error details
+    });
+  }
 };
 
-export const editCategory = (req, res) => {
-  const categories = readData("db/categories.json");
-  const categoryIndex = categories.findIndex(
-    (c) => c.id === parseInt(req.params.id)
-  );
-  if (categoryIndex === -1) {
-    return res.status(404).send("Category not found");
+export const editCategory = async (req, res) => {
+  try {
+    const { categoryName, categoryDescription } = req.body;
+    const [updated] = await Category.update(
+      { categoryName, categoryDescription },
+      { where: { id: req.params.id } }
+    );
+    if (updated) {
+      const updatedCategory = await Category.findByPk(req.params.id);
+      return res.status(200).json(updatedCategory);
+    } else {
+      res.status(404).json({
+        status: "Failed",
+        message: "Category not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error updating category:", error); // Log the error
+    res.status(500).json({
+      status: "error",
+      message: "Error updating category",
+      details: error.message, // Provide more error details
+    });
   }
-
-  const updatedCategory = { ...categories[categoryIndex], ...req.body };
-  categories[categoryIndex] = updatedCategory;
-  writeData("db/categories.json", categories);
-  res.json(updatedCategory);
 };
 
-export const deleteCategory = (req, res) => {
-  const categories = readData("db/categories.json");
-  const categoryIndex = categories.findIndex(
-    (c) => c.id === parseInt(req.params.id)
-  );
-  if (categoryIndex === -1) {
-    return res.status(404).send("Category not found");
+export const deleteCategory = async (req, res) => {
+  try {
+    const deleted = await Category.destroy({ where: { id: req.params.id } });
+    if (deleted) {
+      return res.status(204).send();
+    } else {
+      res.status(404).json({
+        status: "Failed",
+        message: "Category not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error deleting category:", error); // Log the error
+    res.status(500).json({
+      status: "error",
+      message: "Error deleting category",
+      details: error.message, // Provide more error details
+    });
   }
-
-  categories.splice(categoryIndex, 1);
-  writeData("db/categories.json", categories);
-  res.status(204).send();
 };

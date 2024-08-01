@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getAllTransaction,
+  getAllTransactions,
   getTransactionById,
   createTransaction,
   editTransaction,
@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.route("/").get(getAllTransaction).post(createTransaction);
+router.route("/").get(getAllTransactions).post(createTransaction);
 router
   .route("/:id")
   .get(getTransactionById)

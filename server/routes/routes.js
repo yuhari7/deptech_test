@@ -1,7 +1,14 @@
 // routes/routes.js
-import { AdminRouter } from "./adminRoutes.js";
+import { UserRouter } from "./userRoutes.js";
 import { CategoryRouter } from "./categoryRoutes.js";
 import { ProductRouter } from "./productRoutes.js";
 import { TransactionRouter } from "./transactionRoute.js";
+import { RoleRouter } from "./roleRoutes.js";
 
-export { AdminRouter, CategoryRouter, ProductRouter, TransactionRouter };
+export {
+  UserRouter,
+  CategoryRouter,
+  ProductRouter,
+  TransactionRouter,
+  RoleRouter,
+};
