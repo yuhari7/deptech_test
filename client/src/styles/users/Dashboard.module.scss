@@ -1,0 +1,41 @@
+.dashboardContainer {
+  padding: 20px;
+}
+
+.header {
+  font-size: 2rem;
+}
+
+.statsContainer {
+  display: flex;
+  gap: 20px;
+}
+
+.statsCard {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+}
+
+.transactionsList {
+  margin-top: 20px;
+}
+
+.transactionsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.transactionsTable th, .transactionsTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.detailsLink {
+  color: #0070f3;
+  text-decoration: none;
+}

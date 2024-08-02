@@ -1,0 +1,39 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border-bottom: 1px solid #444;
+  }
+  
+  .userName {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .searchContainer {
+    flex: 1;
+    margin: 0 20px;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  .profile {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profileIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+  

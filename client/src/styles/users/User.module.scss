@@ -1,0 +1,112 @@
+// styles/User.module.scss
+
+// Container for the entire user management section
+.container {
+    padding: 20px;
+    background-color: #f5f5f5; // Light background for contrast
+  }
+  
+  // Header styling inside the container
+  .header {
+    color: #333; // Darker color for better readability
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  // Button to create a new user
+  .createUserButton {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #27ae60, #2ecc71); // Gradient color
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 20px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto; // Center button
+  }
+  
+  .createUserButton:hover {
+    background: linear-gradient(135deg, #229954, #27ae60); // Darker gradient on hover
+    transform: scale(1.05); // Slightly enlarge on hover
+  }
+  
+  // Table styling
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    font-family: 'Arial', sans-serif;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); // Shadow for depth
+    background: #fff; // White background for the table
+    border-radius: 8px; // Rounded corners
+    overflow: hidden; // Hide overflow from rounded corners
+  }
+  
+  // Table headers
+  .table th,
+  .table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  // Header background
+  .table thead {
+    background: #2c3e50; // Darker background for header
+    color: white;
+  }
+  
+  // Alternating row backgrounds
+  .table tbody tr:nth-child(even) {
+    background: #f9f9f9;
+  }
+  
+  // Hover effect for rows
+  .table tbody tr:hover {
+    background: #e0e0e0;
+  }
+  
+  // Actions column styling
+  .actions {
+    display: flex;
+    justify-content: center; // Center actions
+    gap: 10px; // Space between buttons
+  }
+  
+  // Edit and delete buttons styling
+  .buttonEdit,
+  .buttonDelete {
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  // Edit button styling
+  .buttonEdit {
+    background: linear-gradient(135deg, #3498db, #2980b9); // Gradient color
+  }
+  
+  .buttonEdit:hover {
+    background: linear-gradient(135deg, #2980b9, #3498db); // Darker gradient on hover
+    transform: scale(1.05); // Slightly enlarge on hover
+  }
+  
+  // Delete button styling
+  .buttonDelete {
+    background: linear-gradient(135deg, #e74c3c, #c0392b); // Gradient color
+  }
+  
+  .buttonDelete:hover {
+    background: linear-gradient(135deg, #c0392b, #e74c3c); // Darker gradient on hover
+    transform: scale(1.05); // Slightly enlarge on hover
+  }
+  

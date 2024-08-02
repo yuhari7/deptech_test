@@ -1,0 +1,64 @@
+// TransactionDetail.module.scss
+
+.transactionDetailContainer {
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transactionHeader {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transactionHeader h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.transactionHeader p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.transactionDetailsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.transactionDetailsTable th,
+.transactionDetailsTable td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.transactionDetailsTable th {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.transactionDetailsTable td {
+  background-color: #ffffff;
+}
+
+.transactionDetailsTable tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.transactionDetailsTable tr:hover td {
+  background-color: #f1f1f1;
+}
+
+.noDetails {
+  font-size: 1.2rem;
+  color: #888;
+  text-align: center;
+  margin-top: 20px;
+}

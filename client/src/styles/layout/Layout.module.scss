@@ -1,0 +1,28 @@
+/* styles/Layout.module.css */
+.container {
+    display: flex;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+    }
+}
+.mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+.content {
+    flex-grow: 1;
+    padding: 40px;
+    background-color: #ecf0f1;
+    border-left: 1px solid #ccc;
+
+    /* Adds a border to visually separate from the sidebar */
+    @media screen and (max-width: 768px) {
+        border-left: none;
+        border-top: 1px solid #ccc;
+    }
+}

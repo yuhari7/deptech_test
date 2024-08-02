@@ -1,0 +1,53 @@
+.container {
+    padding: 20px;
+
+    
+  
+  label {
+    font-size: 1rem;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  textarea {
+    resize: vertical;
+  }
+  }
+  
+  .header {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .submitButton {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .error {
+    color: #f44336; /* Red */
+    font-size: 0.875rem;
+  }
+  
+  .success {
+    color: #4CAF50; /* Green */
+    font-size: 0.875rem;
+  }
+  

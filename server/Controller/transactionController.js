@@ -8,51 +8,41 @@ import {
 export const createTransaction = async (req, res) => {
   const { transactionType, details } = req.body;
 
-  if (!transactionType || !details || !Array.isArray(details)) {
-    return res.status(400).json({ error: "Invalid transaction data" });
-  }
-
   try {
-    // Create the transaction record
-    const newTransaction = await Transaction.create({ transactionType });
+    const transaction = await Transaction.create({ transactionType });
 
-    // Process each product in the transaction details
-    for (const item of details) {
-      const { productId, quantity } = item;
+    if (details && Array.isArray(details)) {
+      const transactionDetails = await Promise.all(
+        details.map(async (detail) => {
+          const { productId, quantity } = detail;
+          const product = await Product.findByPk(productId);
 
-      // Check if product exists
-      const product = await Product.findByPk(productId);
-      if (!product) {
-        return res
-          .status(400)
-          .json({ error: `Invalid productId: ${productId}` });
-      }
+          if (!product) {
+            throw new Error(`Product with ID ${productId} not found`);
+          }
 
-      // Check stock availability for StockOut transactions
-      if (transactionType === "StockOut" && product.stock < quantity) {
-        return res
-          .status(400)
-          .json({ error: `Insufficient stock for productId: ${productId}` });
-      }
+          if (product.stock < quantity) {
+            throw new Error(
+              `Insufficient stock for product ${product.productName}`
+            );
+          }
 
-      // Update product stock
-      product.stock =
-        transactionType === "StockIn"
-          ? product.stock + quantity
-          : product.stock - quantity;
-      await product.save();
+          product.stock -= quantity;
+          await product.save();
 
-      // Create transaction detail record
-      await TransactionDetail.create({
-        transactionId: newTransaction.id,
-        productId,
-        quantity,
-      });
+          return TransactionDetail.create({
+            transactionId: transaction.id,
+            productId,
+            quantity,
+          });
+        })
+      );
+
+      transaction.setTransactionDetails(transactionDetails);
     }
 
-    res.status(201).json(newTransaction);
+    res.status(201).json(transaction);
   } catch (error) {
-    console.error("Error creating transaction:", error);
     res
       .status(500)
       .json({ error: "Error creating transaction", details: error.message });

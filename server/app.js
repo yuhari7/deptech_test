@@ -11,7 +11,10 @@ import {
   ProductRouter,
   TransactionRouter,
   RoleRouter,
+  AuthRouter,
 } from "./routes/routes.js";
+import { authenticateToken } from "./middleware/authMiddleware.js";
+import { upload } from "./middleware/multer.js";
 
 const app = express();
 
@@ -24,15 +27,31 @@ app.use(
   })
 );
 
-// 1) Middleware
-app.use(morgan("dev"));
-app.use(express.json());
+app.use(morgan("dev")); // Logging requests
 app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
+  req.requestTime = new Date().toISOString(); // Add timestamp to requests
   next();
 });
 
-// 2) ROUTES
+// Public Routes
+app.use("/api/v1/auth", AuthRouter);
+
+// Protected Routes
+// app.use("/api/v1/roles", authenticateToken, RoleRouter);
+// app.use("/api/v1/admins", authenticateToken, UserRouter);
+// app.use("/api/v1/categories", authenticateToken, CategoryRouter);
+// app.use(
+//   "/api/v1/products",
+//   authenticateToken,
+//   upload.single("productImage"),
+//   ProductRouter
+// );
+// app.use(
+//   "/api/v1/transactions",
+//   authenticateToken,
+//   upload.single("productImage"),
+//   TransactionRouter
+// );
 app.use("/api/v1/roles", RoleRouter);
 app.use("/api/v1/admins", UserRouter);
 app.use("/api/v1/categories", CategoryRouter);
