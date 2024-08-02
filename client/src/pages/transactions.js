@@ -1,142 +1,196 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { getProducts } from "@/pages/api/product"; // Make sure this function is defined correctly
-import { createTransaction } from "@/pages/api/transaction";
-import Layout from "@/components/admin-dashboard/Layout";
+import { getTransactions, createTransaction } from "./api/transaction";
+import { getProducts, getProductById, updateProduct } from "./api/product";
 import styles from "@/styles/transactions/CreateTransaction.module.scss";
 
-const CreateTransaction = () => {
-  const [products, setProducts] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState({});
-  const [transactionType, setTransactionType] = useState("Purchase");
+const TransactionPage = () => {
+  const [transactions, setTransactions] = useState([]);
+  const [transactionType, setTransactionType] = useState("StockIn");
   const [transactionDate, setTransactionDate] = useState(
     new Date().toISOString()
   );
-  const [adminId, setAdminId] = useState(1); // Adjust based on your logic
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState("");
-  const router = useRouter();
+  const [details, setDetails] = useState([
+    { productId: "", quantity: "", productName: "" },
+  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data);
+    const fetchTransactions = async () => {
+      try {
+        const data = await getTransactions();
+        setTransactions(data);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
     };
+
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
     fetchProducts();
   }, []);
 
-  const handleProductChange = (e) => {
-    const { name, value } = e.target;
-    const [productId, field] = name.split(":");
-
-    setSelectedProducts((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        [field]: value,
-      },
-    }));
+  const handleAddDetail = () => {
+    setDetails([...details, { productId: "", quantity: "", productName: "" }]);
   };
 
-  const handleAddProduct = (productId) => {
-    setSelectedProducts((prev) => ({
-      ...prev,
-      [productId]: { productId, quantity: "" },
-    }));
-  };
+  const handleDetailChange = async (index, field, value) => {
+    const updatedDetails = [...details];
+    updatedDetails[index][field] = value;
 
-  const handleRemoveProduct = (productId) => {
-    setSelectedProducts((prev) => {
-      const { [productId]: removed, ...rest } = prev;
-      return rest;
-    });
+    if (field === "productId") {
+      try {
+        const product = await getProductById(value);
+        updatedDetails[index].productName = product ? product.productName : "";
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        updatedDetails[index].productName = "";
+      }
+    }
+
+    setDetails(updatedDetails);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate stock levels for 'Sell' transactions
+    if (transactionType === "StockOut") {
+      let isStockSufficient = true;
+
+      for (const detail of details) {
+        const product = products.find((p) => p.id === Number(detail.productId));
+        if (product && product.stock < detail.quantity) {
+          isStockSufficient = false;
+          break;
+        }
+      }
+
+      if (!isStockSufficient) {
+        setError("Insufficient stock for one or more products.");
+        return; // Exit the function to prevent transaction creation
+      }
+    }
+
+    const transactionData = {
+      transactionType,
+      transactionDate,
+      details: details.map(({ productId, quantity }) => ({
+        productId,
+        quantity,
+      })),
+    };
+
     try {
-      const productsArray = Object.values(selectedProducts).map((item) => ({
-        productId: item.productId,
-        quantity: parseInt(item.quantity, 10),
-      }));
+      // Create the transaction
+      await createTransaction(transactionData);
+      alert("Transaction created successfully!");
 
-      const response = await createTransaction({
-        transactionType,
-        transactionDate,
-        adminId,
-        details: productsArray,
-      });
+      // Update the stock levels
+      for (const detail of details) {
+        const product = products.find((p) => p.id === Number(detail.productId));
+        if (product) {
+          const newStock =
+            transactionType === "StockIn"
+              ? product.stock + Number(detail.quantity)
+              : product.stock - Number(detail.quantity);
 
-      setSuccess("Transaction created successfully");
-      router.push("/transactions");
+          // Update the product stock
+          await updateProduct(product.id, { stock: newStock });
+        }
+      }
+
+      // Reset the form
+      setTransactionType("StockIn");
+      setTransactionDate(new Date().toISOString());
+      setDetails([{ productId: "", quantity: "", productName: "" }]);
+      setError(""); // Clear any previous errors
+
+      // Fetch updated transactions
+      const data = await getTransactions();
+      setTransactions(data);
     } catch (error) {
-      console.error("Failed to create transaction:", error);
-      setError("Failed to create transaction");
+      console.error("Error creating transaction:", error);
+      // setError("Error creating transaction. Please try again.");
     }
   };
 
   return (
-    <Layout pageTitle="Create Transaction">
-      <div className={styles.createTransactionContainer}>
-        <h1>Create Transaction</h1>
-        {error && <p className={styles.error}>{error}</p>}
-        {success && <p className={styles.success}>{success}</p>}
-        <form className={styles.createTransactionForm} onSubmit={handleSubmit}>
-          <label htmlFor="transactionType">Transaction Type:</label>
+    <div className={styles.container}>
+      <h1>Transaction Management</h1>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div>
+          <label htmlFor="transactionType">Transaction Type</label>
           <select
             id="transactionType"
-            name="transactionType"
             value={transactionType}
             onChange={(e) => setTransactionType(e.target.value)}
           >
-            <option value="Purchase">Purchase</option>
-            <option value="Sale">Sale</option>
+            <option value="StockIn">Purchase</option>
+            <option value="StockOut">Sell</option>
           </select>
-          <label htmlFor="transactionDate">Transaction Date:</label>
+        </div>
+        <div>
+          <label htmlFor="transactionDate">Transaction Date</label>
           <input
-            type="datetime-local"
             id="transactionDate"
-            name="transactionDate"
-            value={transactionDate}
+            type="datetime-local"
+            value={new Date(transactionDate).toISOString().slice(0, 16)}
             onChange={(e) => setTransactionDate(e.target.value)}
           />
-          {/* <label htmlFor="adminId">Admin ID:</label>
-          <input
-            type="number"
-            id="adminId"
-            name="adminId"
-            value={adminId}
-            onChange={(e) => setAdminId(e.target.value)}
-          /> */}
-          <label>Products:</label>
-          {products.length ? (
-            products.map((product) => (
-              <div key={product.id} className={styles.productItem}>
-                <p>{product.productName}</p>
-                <button
-                  type="button"
-                  onClick={() => handleAddProduct(product.id)}
-                >
-                  Add
-                </button>
-                {selectedProducts[product.id] && (
-                  <input
-                    type="number"
-                    name={`${product.id}:quantity`}
-                    value={selectedProducts[product.id].quantity}
-                    onChange={handleProductChange}
-                  />
-                )}
-              </div>
-            ))
-          ) : (
-            <p>No products available.</p>
-          )}
-          <button type="submit">Create Transaction</button>
-        </form>
-      </div>
-    </Layout>
+        </div>
+        {details.map((detail, index) => (
+          <div key={index}>
+            <h3>Detail {index + 1}</h3>
+            <div>
+              <label htmlFor={`productId-${index}`}>Product</label>
+              <select
+                id={`productId-${index}`}
+                value={detail.productId}
+                onChange={(e) =>
+                  handleDetailChange(index, "productId", e.target.value)
+                }
+              >
+                <option value="">Select Product</option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.productName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor={`quantity-${index}`}>Quantity</label>
+              <input
+                id={`quantity-${index}`}
+                type="number"
+                value={detail.quantity}
+                onChange={(e) =>
+                  handleDetailChange(index, "quantity", e.target.value)
+                }
+              />
+            </div>
+          </div>
+        ))}
+        <button type="button" onClick={handleAddDetail}>
+          Add Detail
+        </button>
+        <button type="submit">Create Transaction</button>
+        {error && <p className={styles.error}>{error}</p>}
+      </form>
+    </div>
   );
 };
 
-export default CreateTransaction;
+export default TransactionPage;

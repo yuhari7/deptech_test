@@ -1,4 +1,3 @@
-// pages/products/index.js
 import { useState } from "react";
 import { getProducts } from "@/pages/api/product";
 import { getCategories } from "@/pages/api/category";
@@ -18,8 +17,10 @@ const ProductsPage = ({ initialProducts, categories }) => {
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/products/${id}`
         );
         setProducts(products.filter((product) => product.id !== id));
+        alert("Product deleted successfully");
       } catch (error) {
         console.error("Error deleting product:", error);
+        alert("Failed to delete product");
       }
     }
   };
@@ -29,7 +30,6 @@ const ProductsPage = ({ initialProducts, categories }) => {
     return imagePath.startsWith("http") ? imagePath : `/${imagePath}`;
   };
 
-  // Helper function to get category name by ID
   const getCategoryName = (categoryId) => {
     const category = categories.find((cat) => cat.id === categoryId);
     return category ? category.categoryName : "Unknown";
@@ -92,7 +92,6 @@ const ProductsPage = ({ initialProducts, categories }) => {
 };
 
 export async function getServerSideProps() {
-  // Fetch products and categories
   const [initialProducts, categories] = await Promise.all([
     getProducts(),
     getCategories(),

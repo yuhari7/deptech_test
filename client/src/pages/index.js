@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,11 @@ export default function Home({ products }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <nav className={styles.nav}>
+        <button className={styles.login}>
+          <Link href="/login">Login</Link>
+        </button>
+      </nav>
       <main className={`${styles.main} ${inter.className}`}>
         <h1 className={styles.title}>Available Products</h1>
         <div className={styles.grid}>

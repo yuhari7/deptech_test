@@ -7,15 +7,6 @@ import Layout from "@/components/admin-dashboard/Layout";
 const CategoriesPage = ({ initialCategories }) => {
   const [categories, setCategories] = useState(initialCategories);
 
-  useEffect(() => {
-    // Optional: Refetch categories if needed
-    // const fetchCategories = async () => {
-    //   const data = await getCategories();
-    //   setCategories(data);
-    // };
-    // fetchCategories();
-  }, []);
-
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this category?")) {
       try {

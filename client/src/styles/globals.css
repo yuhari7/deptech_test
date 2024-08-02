@@ -73,6 +73,17 @@
   }
 }
 
+/* Define a modern color palette */
+:root {
+  --primary-color: #007bff; /* Blue */
+  --secondary-color: #28a745; /* Green */
+  --text-color: #333; /* Dark grey */
+  --background-color: #f4f4f4; /* Light grey */
+  --card-bg-color: #fff; /* White */
+  --border-color: #ddd; /* Light grey */
+  --error-color: #dc3545; /* Red */
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

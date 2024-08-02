@@ -1,31 +1,101 @@
+/* Define a modern color palette */
+$primary-color: #007bff; // Blue
+$secondary-color: #28a745; // Green
+$error-color: #dc3545; // Red
+$background-color: #f4f4f4; // Light grey
+$text-color: #333; // Dark grey
+$border-color: #ddd; // Light grey
+
 .container {
-    padding: 20px;
-    
-  button {
-    background-color: #0070f3;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    margin-right: 10px;
-    &:hover {
-      background-color: #005bb5;
-    }
-  }
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   
-  
-  }
-  
-  .transactionsList {
-    margin-bottom: 20px;
-  }
-  
-  .transactionDetail {
-    border-top: 1px solid #ddd;
-    padding-top: 20px;
-  }
-  
-  .error {
-    color: red;
-  }
-  
+
+label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-color;
+  margin-bottom: 8px;
+}
+
+select, input[type="number"], input[type="datetime-local"] {
+  padding: 12px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+select:focus, input:focus {
+  border-color: $primary-color;
+  box-shadow: 0 0 4px rgba($primary-color, 0.5);
+}
+
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  display: inline-block;
+}
+
+button[type="button"] {
+  background-color: $secondary-color;
+}
+
+button[type="submit"] {
+  background-color: $primary-color;
+}
+
+button:hover {
+  background-color: darken($primary-color, 10%);
+  transform: translateY(-2px);
+}
+
+button[type="button"]:hover {
+  background-color: darken($secondary-color, 10%);
+}
+h1 {
+  font-size: 2.5rem;
+  color: $text-color;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.error {
+  color: $error-color;
+  font-size: 0.875rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.detail-section {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-section h3 {
+  font-size: 1.25rem;
+  color: $text-color;
+  margin-bottom: 10px;
+}

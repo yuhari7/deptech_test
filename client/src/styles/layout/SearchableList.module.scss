@@ -1,0 +1,28 @@
+.container {
+    padding: 20px;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .itemList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 1rem;
+  }
+  
+  .item:last-child {
+    border-bottom: none;
+  }
+  

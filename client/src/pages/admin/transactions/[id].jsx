@@ -35,7 +35,7 @@ const TransactionDetailPage = ({ transaction }) => {
               {transaction.TransactionDetails.map((detail) => (
                 <tr key={detail.id}>
                   <td>
-                  <Link href={`/admin/products/${detail.id}`}>
+                  <Link href={`/admin/products/${detail.productId}`}>
                     {detail.Product.productName}
                   </Link>
                     </td>
